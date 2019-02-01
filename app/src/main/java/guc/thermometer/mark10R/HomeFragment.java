@@ -19,7 +19,7 @@ import androidx.fragment.app.Fragment;
 
 public class HomeFragment extends Fragment {
     private static final String ARG_TEXT = "argText";
-    static final String[] list = {"Ossama", "3alama", "7amama", "Salama", "Pyjama", "3alama", "7amama", "Salama", "Pyjama", "3alama", "7amama", "Salama", "Pyjama", "3alama", "7amama", "Salama", "Pyjama"};
+    static final String[] list = {"Android", "iPhone", "Windows", "BlackBerru", "Linux"};
     private String mail;
 
 
