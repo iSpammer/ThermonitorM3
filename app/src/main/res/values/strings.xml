@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">thermometer</string>
+    <string name="mailhint">Mail</string>
+    <string name="placeholdertxt">Lorem ipsum dolor sit amet, vim at sumo sanctus mnesarchum. Duis regione temporibus te mei. Zril interpretaris ne sed. Eos ei laboramus conceptam persequeris, ex ignota posidonium vel, tollit corpora scripserit cum ut.
+</string>
+    <string name="passwordhint">Password</string>
+    <string name="btnlogin">Log in</string>
+    <string name="infomail">MAIL PLACEHOLDER</string>
+    <string name="placeholder">placeholder</string>
+    <string name="admob_app_id">ca-app-pub-9184185768056728~2778951634</string>
+    <string name="admob_banner_id">ca-app-pub-9184185768056728/3090900681</string>
+    <string name="logout">Logout</string>
+    <string name="home">Home</string>
+    <string name="about">About</string>
+    <string name="home_description">Arduino devices list</string>
+    <string name="about_description">Info about the application</string>
+    <string name="about_text">  Created by Ossama Akram , an Android Developer since 2017 \n   this application was made under GUC University NETW Protocol as course project \n   this application is at alpha stage bugs and errors may occur \n   use with caution</string>
+    <string name="share">Share</string>
+    <string name="contact">Contact me</string>
+    <string name="github">Github</string>
+</resources>
