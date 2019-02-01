@@ -2,6 +2,12 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
+        android:id="@+id/register"
+        app:showAsAction="ifRoom|withText"
+        android:title="@string/register">
+    </item>
+
+    <item
         android:id="@+id/About"
         app:showAsAction="ifRoom"
         android:title="@string/about">
@@ -11,4 +17,6 @@
         app:showAsAction="ifRoom|withText"
         android:title="@string/contact">
     </item>
+
+
 </menu>

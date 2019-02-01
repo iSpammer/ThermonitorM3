@@ -15,14 +15,6 @@
       },
       "oauth_client": [
         {
-          "client_id": "1023897077928-4nb0gkr03tr7qdun4e1t7ba8s49ogimp.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "guc.thermometer.mark10R",
-            "certificate_hash": "a8498ac3c29bc7f2b757e4703bd11ba3a281c8e4"
-          }
-        },
-        {
           "client_id": "1023897077928-j7nff73f6uqu16nusl96s1rp8lc3i076.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -37,13 +29,8 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 2,
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1023897077928-j7nff73f6uqu16nusl96s1rp8lc3i076.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "status": 1,
+          "other_platform_oauth_client": []
         },
         "ads_service": {
           "status": 2

@@ -10,14 +10,12 @@ import android.os.Build;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.MobileAds;
@@ -29,7 +27,7 @@ import static android.provider.AlarmClock.EXTRA_MESSAGE;
 
 public class MainActivity extends AppCompatActivity {
     private EditText mailTxt;
-    private TextView password;
+    private EditText password;
     private AdView mAdView;
 
     @Override
@@ -112,6 +110,13 @@ public class MainActivity extends AppCompatActivity {
                         })
                         .setIcon(android.R.drawable.ic_dialog_alert)
                         .show();
+                break;
+            case R.id.register:
+                Intent intentreg = new Intent(this, RegisterActivity.class);
+                intentreg.putExtra("mail", mailTxt.getText().toString());
+                intentreg.putExtra("pw", password.getText().toString());
+                startActivity(intentreg);
+                overridePendingTransition(R.anim.slide_up,R.anim.slide_down);
                 break;
         }
         return true;

@@ -25,14 +25,15 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
     implementation 'com.google.android.gms:play-services-ads:17.1.2'
+    implementation 'com.google.firebase:firebase-core:16.0.6'
     implementation 'com.google.firebase:firebase-messaging:17.3.4'
 
     //drawer
     implementation "com.mikepenz:materialdrawer:6.1.2"
-
-//required support lib modules
     implementation "androidx.recyclerview:recyclerview:1.0.0"
     implementation "androidx.annotation:annotation:1.0.1"
+    implementation "com.mikepenz:crossfadedrawerlayout:1.1.0"
+    implementation "com.mikepenz:materialize:1.2.0"
     //font
     implementation 'com.mikepenz:google-material-typeface:3.0.1.3.original@aar'
     //Google Material Icons
@@ -40,3 +41,4 @@ dependencies {
 
 
 }
+apply plugin: 'com.google.gms.google-services'
