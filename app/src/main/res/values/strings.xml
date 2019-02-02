@@ -27,7 +27,7 @@
     <string name="home_description">Arduino devices list</string>
     <string name="about_description">Info about the application</string>
     <string name="username">User name</string>
-    <string name="about_text">Created by Ossama Akram , an Android Developer since 2017 \n this application was made under GUC University NETW Protocol as a course project \n this application is at alpha stage bugs and errors may occur \n use with caution</string>
+    <string name="about_text">Created by Ossama Akram , an Android Developer since 2017 \n this application was made under GUC University NETW Protocol as a course project \n this application is at alpha stage bugs and errors may occur \n use with caution \n https://ispammer.github.io/site/</string>
     <string name="share">Share</string>
     <string name="contact">Contact me</string>
     <string name="github">Github</string>
