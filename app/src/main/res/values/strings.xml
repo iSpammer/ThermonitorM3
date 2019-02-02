@@ -5,7 +5,19 @@
 </string>
     <string name="passwordhint">Password</string>
     <string name="btnlogin">Log in</string>
+    <string name="save">Save</string>
+    <string name="updated">Updated</string>
+    <string name="usernameerror">Please enter a username</string>
+    <string name="imagechoser">Please select your profile picture</string>
+    <string name="profilepic">Profile picture</string>
     <string name="infomail">MAIL PLACEHOLDER</string>
+    <string name="updateinfo">Update info</string>
+    <string name="incorrectmail">Please enter a correct mail</string>
+    <string name="incorrectpw">Please enter a password</string>
+    <string name="shortpw">Please enter a password with more than 6 chars</string>
+    <string name="regDone">Registration done please go back and sign in!</string>
+    <string name="alreadyReg">Mail already register, login instead</string>
+    <string name="checkCredent">Check your login credentials</string>
     <string name="placeholder">placeholder</string>
     <string name="admob_app_id">ca-app-pub-9184185768056728~2778951634</string>
     <string name="admob_banner_id">ca-app-pub-9184185768056728/3090900681</string>
@@ -20,4 +32,7 @@
     <string name="contact">Contact me</string>
     <string name="github">Github</string>
     <string name="register">Register</string>
+    <string name="noaccount">Dont have an account ?</string>
+    <string name="taptoset">Tap the image icon to set your profile picture</string>
+    <string name="title_activity_tstac">tstac</string>
 </resources>

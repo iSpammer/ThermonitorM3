@@ -1,5 +1,6 @@
 package guc.thermometer.mark10R;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GravityCompat;
@@ -7,15 +8,26 @@ import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.provider.MediaStore;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.mikepenz.crossfadedrawerlayout.view.CrossfadeDrawerLayout;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -34,6 +46,11 @@ import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.util.DrawerUIUtils;
 import com.mikepenz.materialize.util.UIUtils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+
 
 public class loggedActivity extends AppCompatActivity {
     private Drawer result;
@@ -42,6 +59,17 @@ public class loggedActivity extends AppCompatActivity {
     AboutFragment aboutFragment;
     boolean navBar = false;
 
+    FirebaseAuth mAuth;
+    Uri uriprofilepic;
+
+    String photoUrl;
+    String username;
+
+    Drawable icon;
+
+    ImageView placeholder;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -49,34 +77,55 @@ public class loggedActivity extends AppCompatActivity {
         setContentView(R.layout.activity_logged);
 
         Bundle extras = getIntent().getExtras();
-        String mail = extras.getString("mail");
+        String mail = getResources().getString(R.string.mailhint);
+        try {
+            mail = extras.getString("mail");
+        } catch (Exception e) {
+
+        }
         navBar = ViewConfiguration.get(this).hasPermanentMenuKey();
 
         homeFragment = HomeFragment.newInstance(mail);
         aboutFragment = new AboutFragment();
 
+        mAuth = FirebaseAuth.getInstance();
+
+        placeholder = findViewById(R.id.imageView2);
+
+        FirebaseUser user = mAuth.getCurrentUser();
+
+        loadUserInformation();
+
+
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_up, R.anim.slide_down, R.anim.slide_up, R.anim.slide_down).replace(R.id.fragment_container, homeFragment,"HOME").commit();
+        fragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_up, R.anim.slide_down, R.anim.slide_up, R.anim.slide_down).replace(R.id.fragment_container, homeFragment, "HOME").commit();
 
 
         PrimaryDrawerItem item1 = new PrimaryDrawerItem().withName(R.string.home).withIcon(GoogleMaterial.Icon.gmd_home).withDescription(R.string.home_description).withIconTintingEnabled(true).withIdentifier(1);
         PrimaryDrawerItem item2 = new PrimaryDrawerItem().withName(R.string.about).withIcon(GoogleMaterial.Icon.gmd_info).withDescription(R.string.about_description).withIconTintingEnabled(true).withIdentifier(2);
-        PrimaryDrawerItem item3 = new PrimaryDrawerItem().withName(R.string.placeholder).withIcon(GoogleMaterial.Icon.gmd_wb_sunny).withDescription(R.string.placeholder).withIconTintingEnabled(true).withIdentifier(3);
+        PrimaryDrawerItem item3 = new PrimaryDrawerItem().withName(R.string.placeholder).withIcon(GoogleMaterial.Icon.gmd_wb_sunny).withDescription(R.string.updateinfo).withIconTintingEnabled(true).withIdentifier(3);
 
         SecondaryDrawerItem s1 = new SecondaryDrawerItem().withName(R.string.share).withIcon(GoogleMaterial.Icon.gmd_share).withIconTintingEnabled(true).withIdentifier(4);
         SecondaryDrawerItem s2 = new SecondaryDrawerItem().withName(R.string.contact).withIcon(GoogleMaterial.Icon.gmd_local_phone).withIconTintingEnabled(true).withIdentifier(5);
         SecondaryDrawerItem s3 = new SecondaryDrawerItem().withName(R.string.github).withIcon(FontAwesome.Icon.faw_github).withIconTintingEnabled(true).withIdentifier(6);
+        ProfileDrawerItem profileDrawerItem;
 
 
+        try {
+            profileDrawerItem = new ProfileDrawerItem().withName(username).withEmail(user.getEmail()).withIcon(placeholder.getDrawable());
+
+        } catch (Exception e) {
+            profileDrawerItem = new ProfileDrawerItem().withName(getResources().getString(R.string.placeholder)).withEmail(getResources().getString(R.string.placeholder)).withIcon(R.drawable.image);
+        }
         //Account Header Builder
         final AccountHeader headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
                 .withHeaderBackground(R.drawable.bkgrnd)
                 .addProfiles(
-                        new ProfileDrawerItem().withName("Ossama Akram").withEmail(mail).withIcon(getResources().getDrawable(R.drawable.image))
+                        profileDrawerItem
                 )
                 .withOnAccountHeaderListener(new AccountHeader.OnAccountHeaderListener() {
                     @Override
@@ -113,24 +162,6 @@ public class loggedActivity extends AppCompatActivity {
                 .withOnDrawerItemLongClickListener(new Drawer.OnDrawerItemLongClickListener() {
                     @Override
                     public boolean onItemLongClick(View view, int position, IDrawerItem drawerItem) {
-                        switch (position) {
-                            case 1:
-                                Toast.makeText(loggedActivity.this, R.string.home_description, Toast.LENGTH_LONG).show();
-                                break;
-                            case 2:
-                                Toast.makeText(loggedActivity.this, R.string.about_description, Toast.LENGTH_LONG).show();
-                                break;
-                            case 3:
-                                Toast.makeText(loggedActivity.this, R.string.placeholder, Toast.LENGTH_LONG).show();
-                                break;
-                        }
-                        result.closeDrawer();
-                        return false;
-                    }
-                })
-                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
-                    @Override
-                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                         if (drawerItem.getIdentifier() == 1) {
                             result.closeDrawer();
                             new CountDownTimer(1000, 500) {
@@ -141,16 +172,16 @@ public class loggedActivity extends AppCompatActivity {
                                 }
 
                                 public void onTick(long millisUntilFinished) {
-                                    Toast.makeText(loggedActivity.this,R.string.home,Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(loggedActivity.this, R.string.home, Toast.LENGTH_SHORT).show();
                                 }
                             }.start();
-                        }
-                        else if (drawerItem.getIdentifier() == 2)
+                        } else if (drawerItem.getIdentifier() == 2)
                             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                     aboutFragment).addToBackStack(null).commit();
-                        else if (drawerItem.getIdentifier() == 3)
-                            Toast.makeText(loggedActivity.this, R.string.placeholder, Toast.LENGTH_SHORT).show();
-                        else if (drawerItem.getIdentifier() == 4) {
+                        else if (drawerItem.getIdentifier() == 3) {
+                            Intent intent = new Intent(getApplicationContext(), FirsttimesetupActivity.class);
+                            startActivity(intent);
+                        } else if (drawerItem.getIdentifier() == 4) {
                             Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
                             sharingIntent.setType("text/plain");
                             sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, R.string.placeholder);
@@ -169,12 +200,61 @@ public class loggedActivity extends AppCompatActivity {
                             i.setData(Uri.parse(url));
                             startActivity(i);
                         } else if (drawerItem.getIdentifier() == 99) {
-                            Intent intent = new Intent(loggedActivity.this, MainActivity.class);
-                            startActivity(intent);
+                            FirebaseAuth.getInstance().signOut();
                             finish();
-                            overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
                         }
-                        if(result.isDrawerOpen())
+                        if (result.isDrawerOpen())
+                            result.closeDrawer();
+                        return false;
+                    }
+                })
+                .withOnDrawerItemClickListener(new Drawer.OnDrawerItemClickListener() {
+                    @Override
+                    public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
+                        if (drawerItem.getIdentifier() == 1) {
+                            result.closeDrawer();
+                            new CountDownTimer(1000, 500) {
+                                public void onFinish() {
+                                    if (homeFragment == null || !homeFragment.isVisible()) {
+                                        onBackPressed();
+                                    }
+                                }
+
+                                public void onTick(long millisUntilFinished) {
+                                    Toast.makeText(loggedActivity.this, R.string.home, Toast.LENGTH_SHORT).show();
+                                }
+                            }.start();
+                        } else if (drawerItem.getIdentifier() == 2)
+                            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
+                                    aboutFragment).addToBackStack(null).commit();
+                        else if (drawerItem.getIdentifier() == 3) {
+                            Intent intent = new Intent(getApplicationContext(), FirsttimesetupActivity.class);
+                            startActivity(intent);
+                        } else if (drawerItem.getIdentifier() == 4) {
+                            Intent sharingIntent = new Intent(android.content.Intent.ACTION_SEND);
+                            sharingIntent.setType("text/plain");
+                            sharingIntent.putExtra(android.content.Intent.EXTRA_SUBJECT, R.string.placeholder);
+                            sharingIntent.putExtra(android.content.Intent.EXTRA_TEXT, R.string.placeholdertxt);
+                            startActivity(Intent.createChooser(sharingIntent, "Share via"));
+                        } else if (drawerItem.getIdentifier() == 5) {
+                            Intent intent = new Intent(Intent.ACTION_SEND);
+                            intent.setType("plain/text");
+                            intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"ispamossama@gmail.com"});
+                            intent.putExtra(Intent.EXTRA_SUBJECT, "Mark10 Support");
+                            intent.putExtra(Intent.EXTRA_TEXT, R.string.placeholdertxt);
+                            startActivity(Intent.createChooser(intent, ""));
+                        } else if (drawerItem.getIdentifier() == 6) {
+                            String url = "https://github.com/iSpammer/";
+                            Intent i = new Intent(Intent.ACTION_VIEW);
+                            i.setData(Uri.parse(url));
+                            startActivity(i);
+                        } else if (drawerItem.getIdentifier() == 99) {
+                            FirebaseAuth.getInstance().signOut();
+                            finish();
+                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                        }
+                        if (result.isDrawerOpen())
                             result.closeDrawer();
                         return false;
                     }
@@ -244,9 +324,34 @@ public class loggedActivity extends AppCompatActivity {
     }
 
 
-    public boolean hasNavBar (Resources resources)
-    {
-        int id = resources.getIdentifier("config_showNavigationBar", "bool", "android");
-        return id > 0 && resources.getBoolean(id);
+    //if user isnt logged int
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mAuth.getCurrentUser() == null) {
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(intent);
+            overridePendingTransition(R.anim.slide_up, R.anim.slide_down);
+            finish();
+        }
     }
+
+    private void loadUserInformation() {
+
+        final FirebaseUser user = mAuth.getCurrentUser();
+
+        if (user != null) {
+            if (user.getPhotoUrl() != null) {
+
+                Glide.with(this)
+                        .load(user.getPhotoUrl().toString())
+                        .into(placeholder);
+            }
+            if (user.getDisplayName() != null) {
+                username = user.getDisplayName();
+            }
+        }
+    }
+
 }
