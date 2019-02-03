@@ -30,8 +30,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -54,8 +52,6 @@ public class FirsttimesetupActivity extends AppCompatActivity {
     String profileImageUrl;
 
     FirebaseAuth mAuth;
-    private StorageReference storageReference;
-    private DatabaseReference databaseReference;
     private StorageTask uploadTask;
 
     @Override
@@ -73,9 +69,6 @@ public class FirsttimesetupActivity extends AppCompatActivity {
         progressBar = findViewById(R.id.progress_bar);
         textView = findViewById(R.id.textViewVerified);
 
-        storageReference = FirebaseStorage.getInstance().getReference("uploads");
-        databaseReference = FirebaseDatabase.getInstance().getReference("uploads");
-
 
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,66 +83,9 @@ public class FirsttimesetupActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 saveUserInformation();
-//                if (uploadTask != null && uploadTask.isInProgress()) {
-//                    uploadFile();
-//                    Toast.makeText(getApplicationContext(),"Uploading",Toast.LENGTH_SHORT).show();
-//                }
-//                else{
-//                    Toast.makeText(getApplicationContext(),"Wait",Toast.LENGTH_SHORT).show();
-//
-//                }
-
             }
         });
     }
-
-
-    //get file extension
-    private String getFileExtension(Uri uri) {
-        ContentResolver contentResolver = getContentResolver();
-        MimeTypeMap mime = MimeTypeMap.getSingleton();
-        return mime.getExtensionFromMimeType(contentResolver.getType(uri));
-    }
-
-
-    private void uploadFile() {
-        if (mimageUri != null) {
-            //milisecond to get unique name
-            StorageReference fileRefrence = storageReference.child(System.currentTimeMillis() + "." + getFileExtension(mimageUri));
-            uploadTask = fileRefrence.putFile(mimageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            progressBar.setProgress(0);
-                        }
-                    }, 500);
-                    Toast.makeText(getApplicationContext(), "Uploaded", Toast.LENGTH_SHORT).show();
-                    Upload upload = new Upload("dp".trim(), taskSnapshot.getMetadata().getReference().getDownloadUrl().toString());
-                    String uploadId = databaseReference.push().getKey();
-                    databaseReference.child(uploadId).setValue(upload);
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                    double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
-                    progressBar.setProgress((int) progress);
-
-                }
-            });
-        } else {
-            Toast.makeText(this, "Please select a picture", Toast.LENGTH_SHORT).show();
-        }
-    }
-
 
     @Override
     protected void onStart() {
@@ -281,7 +217,7 @@ public class FirsttimesetupActivity extends AppCompatActivity {
                 public void onFailure(@NonNull Exception e) {
                     Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
-                }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
                     double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());

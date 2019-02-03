@@ -1,40 +1,24 @@
 package guc.thermometer.mark10R;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.FragmentManager;
 
-import android.content.Context;
+import android.app.Fragment;
 import android.content.Intent;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.provider.MediaStore;
-import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.crossfadedrawerlayout.view.CrossfadeDrawerLayout;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -54,9 +38,6 @@ import com.mikepenz.materialdrawer.util.DrawerUIUtils;
 import com.mikepenz.materialize.util.UIUtils;
 import com.squareup.picasso.Picasso;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class loggedActivity extends AppCompatActivity {
     private Drawer result;
     private CrossfadeDrawerLayout crossfadeDrawerLayout;
@@ -66,14 +47,8 @@ public class loggedActivity extends AppCompatActivity {
 
     String username;
 
-    ImageView placeholder;
-
     //firebase
-    private DatabaseReference databaseReference;
     FirebaseAuth mAuth;
-
-    private List<Upload> uploads;
-
 
 
     @Override
@@ -90,8 +65,7 @@ public class loggedActivity extends AppCompatActivity {
 
         try {
             homeFragment = HomeFragment.newInstance(user.getDisplayName());
-        }
-        catch (NullPointerException e){
+        } catch (NullPointerException e) {
             homeFragment = HomeFragment.newInstance(user.getEmail());
         }
         aboutFragment = new AboutFragment();
@@ -102,25 +76,6 @@ public class loggedActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
-
-        uploads = new ArrayList<>();
-        databaseReference = FirebaseDatabase.getInstance().getReference("uploads");
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                //getting database refrence in array
-                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
-                    Upload upload = postSnapshot.getValue(Upload.class);
-                    uploads.add(upload);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-                Toast.makeText(getApplicationContext(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
-            }
-        });
 
 
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -138,11 +93,11 @@ public class loggedActivity extends AppCompatActivity {
 
         try {
             //uploads.get(0);
-            profileDrawerItem = new ProfileDrawerItem().withName(username).withEmail(user.getEmail()).withIcon(uploads.get(0).getImageUrl());
+            profileDrawerItem = new ProfileDrawerItem().withName(username).withEmail(user.getEmail()).withIcon(R.mipmap.ic_launcher_round);
 
 
         } catch (Exception e) {
-            profileDrawerItem = new ProfileDrawerItem().withName(getResources().getString(R.string.placeholder)).withEmail(getResources().getString(R.string.placeholder)).withIcon(R.drawable.image);
+            profileDrawerItem = new ProfileDrawerItem().withName(getResources().getString(R.string.placeholder)).withEmail(getResources().getString(R.string.placeholder)).withIcon(R.mipmap.ic_launcher);
         }
         //placeholder.setImageURI(user.getPhotoUrl());
 
@@ -161,21 +116,22 @@ public class loggedActivity extends AppCompatActivity {
                 })
                 .build();
 
-        ImageView drawerImageIcon = headerResult.getHeaderBackgroundView();
+//        if (user.getPhotoUrl() != null) {
+//
+//            Glide.with(this)
+//                    .load(user.getPhotoUrl().toString())
+//                    .into(drawerImageIcon);
+//        }
 
+        ImageView drawerImageIcon = headerResult.getHeaderBackgroundView();
         try {
             Picasso.with(this).load(user.getPhotoUrl()).into(drawerImageIcon);
-        }
-        catch (NullPointerException e){
+        } catch (NullPointerException e) {
 
         }
+        headerResult.getActiveProfile().withIcon(drawerImageIcon.getDrawable());
 
-        if (user.getPhotoUrl() != null) {
-
-            Glide.with(this)
-                    .load(user.getPhotoUrl().toString())
-                    .into(drawerImageIcon);
-        }
+        headerResult.getHeaderBackgroundView().setImageDrawable(getResources().getDrawable(R.drawable.bkgrnd));
 
         crossfadeDrawerLayout = new CrossfadeDrawerLayout(this);
         result = new DrawerBuilder()
@@ -205,18 +161,11 @@ public class loggedActivity extends AppCompatActivity {
                     @Override
                     public boolean onItemLongClick(View view, int position, IDrawerItem drawerItem) {
                         if (drawerItem.getIdentifier() == 1) {
-                            result.closeDrawer();
-                            new CountDownTimer(1000, 500) {
-                                public void onFinish() {
-                                    if (homeFragment == null || !homeFragment.isVisible()) {
-                                        onBackPressed();
-                                    }
-                                }
-
-                                public void onTick(long millisUntilFinished) {
-                                    Toast.makeText(loggedActivity.this, R.string.home, Toast.LENGTH_SHORT).show();
-                                }
-                            }.start();
+                            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                                getSupportFragmentManager().popBackStack(getSupportFragmentManager().getBackStackEntryAt(0).getId(), getSupportFragmentManager().POP_BACK_STACK_INCLUSIVE);
+                            } else {
+                                onBackPressed();
+                            }
                         } else if (drawerItem.getIdentifier() == 2)
                             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
                                     aboutFragment).addToBackStack(null).commit();
@@ -246,8 +195,9 @@ public class loggedActivity extends AppCompatActivity {
                             finish();
                             startActivity(new Intent(getApplicationContext(), MainActivity.class));
                         }
-                        if (result.isDrawerOpen())
-                            result.closeDrawer();
+                        result.closeDrawer();
+                        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+                        result.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
                         return false;
                     }
                 })
@@ -255,22 +205,15 @@ public class loggedActivity extends AppCompatActivity {
                     @Override
                     public boolean onItemClick(View view, int position, IDrawerItem drawerItem) {
                         if (drawerItem.getIdentifier() == 1) {
-                            result.closeDrawer();
-                            new CountDownTimer(1000, 500) {
-                                public void onFinish() {
-                                    if (homeFragment == null || !homeFragment.isVisible()) {
-                                        onBackPressed();
-                                    }
-                                }
-
-                                public void onTick(long millisUntilFinished) {
-                                    Toast.makeText(loggedActivity.this, R.string.home, Toast.LENGTH_SHORT).show();
-                                }
-                            }.start();
-                        } else if (drawerItem.getIdentifier() == 2)
+                            if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
+                                getSupportFragmentManager().popBackStack(getSupportFragmentManager().getBackStackEntryAt(0).getId(), getSupportFragmentManager().POP_BACK_STACK_INCLUSIVE);
+                            } else {
+                                onBackPressed();
+                            }
+                        } else if (drawerItem.getIdentifier() == 2) {
                             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container,
-                                    aboutFragment).addToBackStack(null).commit();
-                        else if (drawerItem.getIdentifier() == 3) {
+                                    aboutFragment).addToBackStack("").commit();
+                        } else if (drawerItem.getIdentifier() == 3) {
                             Intent intent = new Intent(getApplicationContext(), FirsttimesetupActivity.class);
                             startActivity(intent);
                         } else if (drawerItem.getIdentifier() == 4) {
@@ -361,10 +304,12 @@ public class loggedActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             result.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
         } else {
-            super.onBackPressed();
+           super.onBackPressed();
+        }
+        if(homeFragment.isVisible()){
+
         }
     }
-
 
     //if user isnt logged int
     @Override
