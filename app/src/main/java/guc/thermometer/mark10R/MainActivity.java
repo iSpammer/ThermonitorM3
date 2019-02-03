@@ -189,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
                     Boolean isFirstRun = getSharedPreferences("PREFERENCE", MODE_PRIVATE)
                             .getBoolean("isFirstRun", true);
 
+
                     if (isFirstRun) {
                         //show start activity
 
@@ -196,13 +197,11 @@ public class MainActivity extends AppCompatActivity {
                         Toast.makeText(MainActivity.this, "First Run", Toast.LENGTH_LONG)
                                 .show();
                         finish();
+
+                        getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit()
+                                .putBoolean("isFirstRun", false).apply();
                     }
-
-
-                    getSharedPreferences("PREFERENCE", MODE_PRIVATE).edit()
-                            .putBoolean("isFirstRun", false).apply();
-
-                    if (!isFirstRun) {
+                    else {
                         Intent intent = new Intent(getApplicationContext(), loggedActivity.class);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         startActivity(intent);

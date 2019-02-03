@@ -1,22 +1,21 @@
 package guc.thermometer.mark10R;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
-import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.IntentSender;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -31,13 +30,15 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.IOException;
-import java.util.UUID;
 
 public class FirsttimesetupActivity extends AppCompatActivity {
 
@@ -47,12 +48,15 @@ public class FirsttimesetupActivity extends AppCompatActivity {
     ImageView imageView;
     EditText editText;
 
-    Uri uriProfileImage;
+    Uri mimageUri;
     ProgressBar progressBar;
 
     String profileImageUrl;
 
     FirebaseAuth mAuth;
+    private StorageReference storageReference;
+    private DatabaseReference databaseReference;
+    private StorageTask uploadTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,8 +70,12 @@ public class FirsttimesetupActivity extends AppCompatActivity {
 
         editText = findViewById(R.id.editTextDisplayName);
         imageView = findViewById(R.id.imageView);
-        progressBar = findViewById(R.id.progressbar);
+        progressBar = findViewById(R.id.progress_bar);
         textView = findViewById(R.id.textViewVerified);
+
+        storageReference = FirebaseStorage.getInstance().getReference("uploads");
+        databaseReference = FirebaseDatabase.getInstance().getReference("uploads");
+
 
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -82,8 +90,64 @@ public class FirsttimesetupActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 saveUserInformation();
+//                if (uploadTask != null && uploadTask.isInProgress()) {
+//                    uploadFile();
+//                    Toast.makeText(getApplicationContext(),"Uploading",Toast.LENGTH_SHORT).show();
+//                }
+//                else{
+//                    Toast.makeText(getApplicationContext(),"Wait",Toast.LENGTH_SHORT).show();
+//
+//                }
+
             }
         });
+    }
+
+
+    //get file extension
+    private String getFileExtension(Uri uri) {
+        ContentResolver contentResolver = getContentResolver();
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        return mime.getExtensionFromMimeType(contentResolver.getType(uri));
+    }
+
+
+    private void uploadFile() {
+        if (mimageUri != null) {
+            //milisecond to get unique name
+            StorageReference fileRefrence = storageReference.child(System.currentTimeMillis() + "." + getFileExtension(mimageUri));
+            uploadTask = fileRefrence.putFile(mimageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            progressBar.setProgress(0);
+                        }
+                    }, 500);
+                    Toast.makeText(getApplicationContext(), "Uploaded", Toast.LENGTH_SHORT).show();
+                    Upload upload = new Upload("dp".trim(), taskSnapshot.getMetadata().getReference().getDownloadUrl().toString());
+                    String uploadId = databaseReference.push().getKey();
+                    databaseReference.child(uploadId).setValue(upload);
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+                    progressBar.setProgress((int) progress);
+
+                }
+            });
+        } else {
+            Toast.makeText(this, "Please select a picture", Toast.LENGTH_SHORT).show();
+        }
     }
 
 
@@ -101,7 +165,13 @@ public class FirsttimesetupActivity extends AppCompatActivity {
 
         if (user != null) {
             if (user.getPhotoUrl() != null) {
-                imageView.setImageURI(user.getPhotoUrl());
+                Glide.with(this)
+                        .load(user.getPhotoUrl().toString())
+                        .into(imageView);
+            }
+
+            if (user.getDisplayName() != null) {
+                editText.setText(user.getDisplayName());
             }
 
             if (user.getDisplayName() != null) {
@@ -166,9 +236,9 @@ public class FirsttimesetupActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == CHOOSE_IMAGE && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            uriProfileImage = data.getData();
+            mimageUri = data.getData();
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), uriProfileImage);
+                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), mimageUri);
                 imageView.setImageBitmap(bitmap);
 
                 uploadImageToFirebaseStorage();
@@ -183,12 +253,19 @@ public class FirsttimesetupActivity extends AppCompatActivity {
         StorageReference profileImageRef =
                 FirebaseStorage.getInstance().getReference("profilepics/" + System.currentTimeMillis() + ".jpg");
 
-        if (uriProfileImage != null) {
+        if (mimageUri != null) {
             progressBar.setVisibility(View.VISIBLE);
-            profileImageRef.putFile(uriProfileImage)
+            profileImageRef.putFile(mimageUri)
                     .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Handler handler = new Handler();
+                            handler.postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    progressBar.setProgress(0);
+                                }
+                            }, 500);
                             progressBar.setVisibility(View.GONE);
                             profileImageUrl = taskSnapshot.getMetadata().getReference().getDownloadUrl().toString();
                         }
@@ -199,7 +276,19 @@ public class FirsttimesetupActivity extends AppCompatActivity {
                             progressBar.setVisibility(View.GONE);
                             Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
                         }
-                    });
+                    }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(getApplicationContext(), e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+                }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    double progress = (100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount());
+                    progressBar.setProgress((int) progress);
+
+                }
+            });
         }
     }
 

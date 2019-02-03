@@ -11,6 +11,9 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import androidx.fragment.app.FragmentTransaction;
 
 import androidx.annotation.NonNull;
@@ -48,8 +51,14 @@ public class HomeFragment extends Fragment {
         }
 
         TextView tvmail = view.findViewById(R.id.tvmail);
-        tvmail.setText("Hello " + mail);
 
+        if (isEmailValid(mail)) {
+            String stringFormater = getResources().getString(R.string.logedas, mail);
+            tvmail.setText(stringFormater);
+        } else {
+            String stringFormater = getResources().getString(R.string.Welcome, mail);
+            tvmail.setText(stringFormater);
+        }
 
         ListView listView = view.findViewById(R.id.listviewLV);
         //     ListAdapter adapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1,list);
@@ -64,7 +73,7 @@ public class HomeFragment extends Fragment {
                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                         String clicked = String.valueOf(parent.getItemAtPosition(position));
                         infoFragment InfoFragment = infoFragment.newInstance(clicked);
-                        replaceFragmentWithAnimation(InfoFragment,null);
+                        replaceFragmentWithAnimation(InfoFragment, null);
                     }
                 }
         );
@@ -78,5 +87,16 @@ public class HomeFragment extends Fragment {
         transaction.replace(R.id.fragment_container, fragment);
         transaction.addToBackStack(tag);
         transaction.commit();
+    }
+
+    public static boolean isEmailValid(String email) {
+        try {
+            String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
+            Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+            Matcher matcher = pattern.matcher(email);
+            return matcher.matches();
+        } catch (Exception e) {
+        }
+        return false;
     }
 }

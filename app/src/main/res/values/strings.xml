@@ -5,11 +5,9 @@
 </string>
     <string name="passwordhint">Password</string>
     <string name="btnlogin">Log in</string>
-    <string name="save">Save</string>
-    <string name="updated">Updated</string>
-    <string name="usernameerror">Please enter a username</string>
-    <string name="imagechoser">Please select your profile picture</string>
-    <string name="profilepic">Profile picture</string>
+    <string name="Welcome">Welcome %1$s</string>
+    <string name="logedas">Logged as %1$s Please update your info and verify your account</string>
+    <string name="update">Update</string>
     <string name="infomail">MAIL PLACEHOLDER</string>
     <string name="updateinfo">Update info</string>
     <string name="incorrectmail">Please enter a correct mail</string>
@@ -26,13 +24,10 @@
     <string name="about">About</string>
     <string name="home_description">Arduino devices list</string>
     <string name="about_description">Info about the application</string>
-    <string name="username">User name</string>
     <string name="about_text">Created by Ossama Akram , an Android Developer since 2017 \n this application was made under GUC University NETW Protocol as a course project \n this application is at alpha stage bugs and errors may occur \n use with caution \n https://ispammer.github.io/site/</string>
     <string name="share">Share</string>
     <string name="contact">Contact me</string>
     <string name="github">Github</string>
     <string name="register">Register</string>
     <string name="noaccount">Dont have an account ?</string>
-    <string name="taptoset">Tap the image icon to set your profile picture</string>
-    <string name="title_activity_tstac">tstac</string>
 </resources>

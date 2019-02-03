@@ -3,19 +3,24 @@ package guc.thermometer.mark10R;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.FragmentManager;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
@@ -23,11 +28,13 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.mikepenz.crossfadedrawerlayout.view.CrossfadeDrawerLayout;
 import com.mikepenz.fontawesome_typeface_library.FontAwesome;
 import com.mikepenz.google_material_typeface_library.GoogleMaterial;
@@ -45,12 +52,10 @@ import com.mikepenz.materialdrawer.model.interfaces.IDrawerItem;
 import com.mikepenz.materialdrawer.model.interfaces.IProfile;
 import com.mikepenz.materialdrawer.util.DrawerUIUtils;
 import com.mikepenz.materialize.util.UIUtils;
+import com.squareup.picasso.Picasso;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
-
+import java.util.ArrayList;
+import java.util.List;
 
 public class loggedActivity extends AppCompatActivity {
     private Drawer result;
@@ -59,15 +64,16 @@ public class loggedActivity extends AppCompatActivity {
     AboutFragment aboutFragment;
     boolean navBar = false;
 
-    FirebaseAuth mAuth;
-    Uri uriprofilepic;
-
-    String photoUrl;
     String username;
 
-    Drawable icon;
-
     ImageView placeholder;
+
+    //firebase
+    private DatabaseReference databaseReference;
+    FirebaseAuth mAuth;
+
+    private List<Upload> uploads;
+
 
 
     @Override
@@ -76,23 +82,20 @@ public class loggedActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_logged);
 
-        Bundle extras = getIntent().getExtras();
-        String mail = getResources().getString(R.string.mailhint);
-        try {
-            mail = extras.getString("mail");
-        } catch (Exception e) {
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser user = mAuth.getCurrentUser();
 
-        }
+
         navBar = ViewConfiguration.get(this).hasPermanentMenuKey();
 
-        homeFragment = HomeFragment.newInstance(mail);
+        try {
+            homeFragment = HomeFragment.newInstance(user.getDisplayName());
+        }
+        catch (NullPointerException e){
+            homeFragment = HomeFragment.newInstance(user.getEmail());
+        }
         aboutFragment = new AboutFragment();
 
-        mAuth = FirebaseAuth.getInstance();
-
-        placeholder = findViewById(R.id.imageView2);
-
-        FirebaseUser user = mAuth.getCurrentUser();
 
         loadUserInformation();
 
@@ -100,26 +103,49 @@ public class loggedActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+
+        uploads = new ArrayList<>();
+        databaseReference = FirebaseDatabase.getInstance().getReference("uploads");
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                //getting database refrence in array
+                for (DataSnapshot postSnapshot : dataSnapshot.getChildren()){
+                    Upload upload = postSnapshot.getValue(Upload.class);
+                    uploads.add(upload);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                Toast.makeText(getApplicationContext(),databaseError.getMessage(),Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().setCustomAnimations(R.anim.slide_up, R.anim.slide_down, R.anim.slide_up, R.anim.slide_down).replace(R.id.fragment_container, homeFragment, "HOME").commit();
 
 
         PrimaryDrawerItem item1 = new PrimaryDrawerItem().withName(R.string.home).withIcon(GoogleMaterial.Icon.gmd_home).withDescription(R.string.home_description).withIconTintingEnabled(true).withIdentifier(1);
         PrimaryDrawerItem item2 = new PrimaryDrawerItem().withName(R.string.about).withIcon(GoogleMaterial.Icon.gmd_info).withDescription(R.string.about_description).withIconTintingEnabled(true).withIdentifier(2);
-        PrimaryDrawerItem item3 = new PrimaryDrawerItem().withName(R.string.placeholder).withIcon(GoogleMaterial.Icon.gmd_wb_sunny).withDescription(R.string.updateinfo).withIconTintingEnabled(true).withIdentifier(3);
+        PrimaryDrawerItem item3 = new PrimaryDrawerItem().withName(R.string.update).withIcon(GoogleMaterial.Icon.gmd_wb_sunny).withDescription(R.string.updateinfo).withIconTintingEnabled(true).withIdentifier(3);
 
         SecondaryDrawerItem s1 = new SecondaryDrawerItem().withName(R.string.share).withIcon(GoogleMaterial.Icon.gmd_share).withIconTintingEnabled(true).withIdentifier(4);
         SecondaryDrawerItem s2 = new SecondaryDrawerItem().withName(R.string.contact).withIcon(GoogleMaterial.Icon.gmd_local_phone).withIconTintingEnabled(true).withIdentifier(5);
         SecondaryDrawerItem s3 = new SecondaryDrawerItem().withName(R.string.github).withIcon(FontAwesome.Icon.faw_github).withIconTintingEnabled(true).withIdentifier(6);
         ProfileDrawerItem profileDrawerItem;
 
-
         try {
-            profileDrawerItem = new ProfileDrawerItem().withName(username).withEmail(user.getEmail()).withIcon(placeholder.getDrawable());
+            //uploads.get(0);
+            profileDrawerItem = new ProfileDrawerItem().withName(username).withEmail(user.getEmail()).withIcon(uploads.get(0).getImageUrl());
+
 
         } catch (Exception e) {
             profileDrawerItem = new ProfileDrawerItem().withName(getResources().getString(R.string.placeholder)).withEmail(getResources().getString(R.string.placeholder)).withIcon(R.drawable.image);
         }
+        //placeholder.setImageURI(user.getPhotoUrl());
+
         //Account Header Builder
         final AccountHeader headerResult = new AccountHeaderBuilder()
                 .withActivity(this)
@@ -134,6 +160,22 @@ public class loggedActivity extends AppCompatActivity {
                     }
                 })
                 .build();
+
+        ImageView drawerImageIcon = headerResult.getHeaderBackgroundView();
+
+        try {
+            Picasso.with(this).load(user.getPhotoUrl()).into(drawerImageIcon);
+        }
+        catch (NullPointerException e){
+
+        }
+
+        if (user.getPhotoUrl() != null) {
+
+            Glide.with(this)
+                    .load(user.getPhotoUrl().toString())
+                    .into(drawerImageIcon);
+        }
 
         crossfadeDrawerLayout = new CrossfadeDrawerLayout(this);
         result = new DrawerBuilder()
@@ -342,16 +384,11 @@ public class loggedActivity extends AppCompatActivity {
         final FirebaseUser user = mAuth.getCurrentUser();
 
         if (user != null) {
-            if (user.getPhotoUrl() != null) {
-
-                Glide.with(this)
-                        .load(user.getPhotoUrl().toString())
-                        .into(placeholder);
-            }
             if (user.getDisplayName() != null) {
                 username = user.getDisplayName();
             }
         }
     }
+
 
 }
