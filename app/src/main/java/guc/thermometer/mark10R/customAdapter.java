@@ -22,7 +22,35 @@ class customAdapter extends ArrayAdapter<String> {
         TextView itemText = CustomView.findViewById(R.id.listtv);
         ImageView imgView = CustomView.findViewById(R.id.imageView);
         itemText.setText(singleItem);
-        imgView.setImageResource(R.mipmap.ic_launcher_round);
+        switch(singleItem){
+            case "SQL":
+                imgView.setImageResource(R.drawable.sql);
+                break;
+            case "Java":
+                imgView.setImageResource(R.drawable.java);
+                break;
+            case "JavaScript":
+                imgView.setImageResource(R.drawable.javascript);
+                break;
+            case "C#":
+                imgView.setImageResource(R.drawable.seessharp);
+                break;
+            case "Python":
+                imgView.setImageResource(R.drawable.python);
+                break;
+            case "C++":
+                imgView.setImageResource(R.drawable.seeplusplus);
+                break;
+            case "PHP":
+                imgView.setImageResource(R.drawable.php);
+                break;
+            case "Koltin":
+                imgView.setImageResource(R.drawable.kotlin);
+                break;
+            default:
+                imgView.setImageResource(R.mipmap.ic_launcher_round);
+
+        }
         return CustomView;
     }
 }

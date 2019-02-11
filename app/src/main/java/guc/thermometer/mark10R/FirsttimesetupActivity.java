@@ -3,10 +3,14 @@ package guc.thermometer.mark10R;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -52,7 +56,6 @@ public class FirsttimesetupActivity extends AppCompatActivity {
     String profileImageUrl;
 
     FirebaseAuth mAuth;
-    private StorageTask uploadTask;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,15 +64,19 @@ public class FirsttimesetupActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbarft);
         setSupportActionBar(toolbar);
+        toolbar.setBackgroundColor(Color.parseColor("#fafafa"));
+        toolbar.setTitleTextColor(ContextCompat.getColor(getApplicationContext(),R.color.primaryTextColor));
+        setSupportActionBar(toolbar);
+
+
 
         editText = findViewById(R.id.editTextDisplayName);
         imageView = findViewById(R.id.imageView);
         progressBar = findViewById(R.id.progress_bar);
         textView = findViewById(R.id.textViewVerified);
-
-
+        progressBar.setProgressTintList(ColorStateList.valueOf(Color.RED));
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -100,6 +107,7 @@ public class FirsttimesetupActivity extends AppCompatActivity {
         final FirebaseUser user = mAuth.getCurrentUser();
 
         if (user != null) {
+            System.out.println("PHOTOURL "+user.getPhotoUrl());
             if (user.getPhotoUrl() != null) {
                 Glide.with(this)
                         .load(user.getPhotoUrl().toString())

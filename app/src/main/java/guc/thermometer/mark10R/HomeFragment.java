@@ -22,7 +22,8 @@ import androidx.fragment.app.Fragment;
 
 public class HomeFragment extends Fragment {
     private static final String ARG_TEXT = "argText";
-    static final String[] list = {"Android", "iPhone", "Windows", "BlackBerru", "Linux"};
+    private static final String[] list = {"SQL", "Java", "JavaScript", "C#", "Python", "C++", "PHP", "Koltin"};
+
     private String mail;
 
 
@@ -56,12 +57,13 @@ public class HomeFragment extends Fragment {
             String stringFormater = getResources().getString(R.string.logedas, mail);
             tvmail.setText(stringFormater);
         } else {
+            System.out.println(mail+"MAAAIL");
             String stringFormater = getResources().getString(R.string.Welcome, mail);
             tvmail.setText(stringFormater);
         }
 
         ListView listView = view.findViewById(R.id.listviewLV);
-        //     ListAdapter adapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1,list);
+        //     ListAdapter adapter = new ArrayAdapter<String>(getActivity(),android.R.layout.simple_list_item_1,cff);
 
         ListAdapter adapter = new customAdapter(getActivity(), list);
 
@@ -81,7 +83,7 @@ public class HomeFragment extends Fragment {
     }
 
 
-    public void replaceFragmentWithAnimation(Fragment fragment, String tag) {
+    private void replaceFragmentWithAnimation(Fragment fragment, String tag) {
         FragmentTransaction transaction = getFragmentManager().beginTransaction();
         transaction.setCustomAnimations(R.anim.slide_up, R.anim.slide_down, R.anim.slide_up, R.anim.slide_down);
         transaction.replace(R.id.fragment_container, fragment);
@@ -89,13 +91,14 @@ public class HomeFragment extends Fragment {
         transaction.commit();
     }
 
-    public static boolean isEmailValid(String email) {
+    private static boolean isEmailValid(String email) {
         try {
             String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
             Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
             Matcher matcher = pattern.matcher(email);
             return matcher.matches();
         } catch (Exception e) {
+            e.printStackTrace();
         }
         return false;
     }

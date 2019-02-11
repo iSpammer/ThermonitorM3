@@ -3,8 +3,10 @@ package guc.thermometer.mark10R;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.os.Bundle;
 import android.util.Patterns;
 import android.view.View;
@@ -21,11 +23,13 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
+import com.google.firebase.database.FirebaseDatabase;
 
 
 public class RegisterActivity extends AppCompatActivity{
     private EditText mailtv;
     private EditText passwordtv;
+    private EditText usernametv;
     private FirebaseAuth mAuth;
     private ProgressBar progressBar;
 
@@ -37,14 +41,18 @@ public class RegisterActivity extends AppCompatActivity{
 
         mailtv = findViewById(R.id.mail);
         passwordtv = findViewById(R.id.passw);
-
+        usernametv = findViewById(R.id.usereditText);
         progressBar = findViewById(R.id.progressBar);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setBackgroundColor(Color.parseColor("#d32f2f"));
+        toolbar.setBackgroundColor(Color.parseColor("#fafafa"));
+        toolbar.setTitleTextColor(ContextCompat.getColor(getApplicationContext(),R.color.primaryTextColor));
+        setSupportActionBar(toolbar);
+        toolbar.getOverflowIcon().setColorFilter(ContextCompat.getColor(this,R.color.primaryTextColor), PorterDuff.Mode.SRC_ATOP);
         MobileAds.initialize(this, getString(R.string.admob_app_id));
 
+        mAuth = FirebaseAuth.getInstance();
 
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
@@ -73,9 +81,25 @@ public class RegisterActivity extends AppCompatActivity{
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if(mAuth.getCurrentUser()!=null){
+            //handle the logged in user
+        }
+    }
+
     public void registerUser() {
-        String mail = mailtv.getText().toString();
-        String password = passwordtv.getText().toString();
+        final String mail = mailtv.getText().toString();
+        final String password = passwordtv.getText().toString();
+        final String name = usernametv.getText().toString();
+
+        if(name.isEmpty()){
+            usernametv.setError("Username is required");
+            usernametv.requestFocus();
+            return;
+        }
+
         if (mail.isEmpty()) {
             mailtv.setError(this.getText(R.string.incorrectmail));
             mailtv.requestFocus();
@@ -96,13 +120,15 @@ public class RegisterActivity extends AppCompatActivity{
             passwordtv.requestFocus();
             return;
         }
+
         progressBar.setVisibility(View.VISIBLE);
-        mAuth = FirebaseAuth.getInstance();
         mAuth.createUserWithEmailAndPassword(mail, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
             @Override
             public void onComplete(@NonNull Task<AuthResult> task) {
                 if (task.isSuccessful()) {
                     try {
+                        User user = new User(name, mail);
+                        FirebaseDatabase.getInstance().getReference("Users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).setValue(user);
                         InputMethodManager imm = (InputMethodManager)getSystemService(INPUT_METHOD_SERVICE);
                         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
                     } catch (Exception e) {

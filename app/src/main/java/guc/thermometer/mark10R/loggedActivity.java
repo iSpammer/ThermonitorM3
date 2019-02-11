@@ -2,12 +2,14 @@ package guc.thermometer.mark10R;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 import androidx.core.view.GravityCompat;
 import androidx.fragment.app.FragmentManager;
 
 import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -63,9 +65,17 @@ public class loggedActivity extends AppCompatActivity {
 
         navBar = ViewConfiguration.get(this).hasPermanentMenuKey();
 
-        try {
+        try{
+        if(!user.getDisplayName().isEmpty()){
+            System.out.println("name "+user.getDisplayName());
             homeFragment = HomeFragment.newInstance(user.getDisplayName());
-        } catch (NullPointerException e) {
+        }
+        else {
+            homeFragment = HomeFragment.newInstance(user.getEmail());
+            System.out.println("mail l "+user.getEmail());
+
+        }
+        }catch (NullPointerException e){
             homeFragment = HomeFragment.newInstance(user.getEmail());
         }
         aboutFragment = new AboutFragment();
@@ -76,6 +86,10 @@ public class loggedActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        toolbar.setBackgroundColor(Color.parseColor("#fafafa"));
+        toolbar.setTitleTextColor(ContextCompat.getColor(getApplicationContext(),R.color.primaryTextColor));
+        setSupportActionBar(toolbar);
+        toolbar.getOverflowIcon().setColorFilter(ContextCompat.getColor(this,R.color.primaryTextColor), PorterDuff.Mode.SRC_ATOP);
 
 
         FragmentManager fragmentManager = getSupportFragmentManager();
@@ -127,7 +141,7 @@ public class loggedActivity extends AppCompatActivity {
         try {
             Picasso.with(this).load(user.getPhotoUrl()).into(drawerImageIcon);
         } catch (NullPointerException e) {
-
+            e.printStackTrace();
         }
         headerResult.getActiveProfile().withIcon(drawerImageIcon.getDrawable());
 
@@ -142,19 +156,19 @@ public class loggedActivity extends AppCompatActivity {
                 .withActivity(this)
                 .withAccountHeader(headerResult)
                 .withToolbar(toolbar)
-                .withSliderBackgroundColor(Color.DKGRAY)
+                .withSliderBackgroundColor(Color.WHITE)
                 .withActionBarDrawerToggleAnimated(true)
                 .withTranslucentNavigationBarProgrammatically(true)
                 .withDrawerWidthDp(72)
                 .addDrawerItems(
-                        item1.withTextColor(Color.WHITE).withIconColor(Color.WHITE),
-                        item2.withTextColor(Color.WHITE).withIconColor(Color.WHITE),
-                        item3.withTextColor(Color.WHITE).withIconColor(Color.WHITE),
+                        item1.withTextColor(Color.BLACK).withIconColor(Color.BLACK),
+                        item2.withTextColor(Color.BLACK).withIconColor(Color.BLACK),
+                        item3.withTextColor(Color.BLACK).withIconColor(Color.BLACK),
                         new DividerDrawerItem(),
-                        s1.withTextColor(Color.WHITE).withIconColor(Color.WHITE).withSelectable(false),
-                        s2.withTextColor(Color.WHITE).withIconColor(Color.WHITE).withSelectable(false),
+                        s1.withTextColor(Color.BLACK).withIconColor(Color.BLACK).withSelectable(false),
+                        s2.withTextColor(Color.BLACK).withIconColor(Color.BLACK).withSelectable(false),
                         new DividerDrawerItem(),
-                        s3.withTextColor(Color.WHITE).withIconColor(Color.WHITE).withSelectable(false),
+                        s3.withTextColor(Color.BLACK).withIconColor(Color.BLACK).withSelectable(false),
                         new SecondaryDrawerItem().withName(R.string.placeholder)
                 )
                 .withOnDrawerItemLongClickListener(new Drawer.OnDrawerItemLongClickListener() {

@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.net.Uri;
 import android.os.Build;
 
@@ -12,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.content.ContextCompat;
 
 import android.os.Bundle;
 import android.util.Patterns;
@@ -26,17 +28,19 @@ import android.widget.Toast;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
     private EditText mailTxt;
     private EditText password;
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
+
 
 
     @Override
@@ -48,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
         password = findViewById(R.id.passw);
 
         Button regBtn = findViewById(R.id.regBtn);
-
         progressBar = findViewById(R.id.progressBar2);
 
         mAuth = FirebaseAuth.getInstance();
@@ -61,7 +64,11 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        toolbar.setBackgroundColor(Color.parseColor("#d32f2f"));
+        toolbar.setBackgroundColor(Color.parseColor("#fafafa"));
+        toolbar.setTitleTextColor(ContextCompat.getColor(getApplicationContext(),R.color.primaryTextColor));
+        setSupportActionBar(toolbar);
+        toolbar.getOverflowIcon().setColorFilter(ContextCompat.getColor(this,R.color.primaryTextColor), PorterDuff.Mode.SRC_ATOP);
+
 
         MobileAds.initialize(this, getString(R.string.admob_app_id));
 
@@ -69,7 +76,15 @@ public class MainActivity extends AppCompatActivity {
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
 
+
+        // Configure Google Sign In
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken("1023897077928-4nb0gkr03tr7qdun4e1t7ba8s49ogimp.apps.googleusercontent.com")
+                .requestEmail()
+                .build();
+
     }
+
 
     public void regBtnOnClick(View view) {
         Intent intentReg = new Intent(this, RegisterActivity.class);
@@ -92,11 +107,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, R.string.checkCredent, Toast.LENGTH_LONG).show();
         }
-    }
-
-    public void tstImage(View v) {
-        Intent tst = new Intent(this, FirsttimesetupActivity.class);
-        startActivity(tst);
     }
 
     @Override

@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">thermometer</string>
     <string name="mailhint">Mail</string>
+    <string name="name">User name</string>
     <string name="placeholdertxt">Lorem ipsum dolor sit amet, vim at sumo sanctus mnesarchum. Duis regione temporibus te mei. Zril interpretaris ne sed. Eos ei laboramus conceptam persequeris, ex ignota posidonium vel, tollit corpora scripserit cum ut.
 </string>
     <string name="passwordhint">Password</string>
