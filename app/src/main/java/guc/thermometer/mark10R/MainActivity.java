@@ -36,7 +36,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 
 public class MainActivity extends AppCompatActivity{
-    private EditText mailTxt;
+     EditText mailTxt;
     private EditText password;
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
