@@ -29,6 +29,7 @@ import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -40,7 +41,7 @@ public class MainActivity extends AppCompatActivity{
     private EditText password;
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
-
+    private SignInButton signInButton;
 
 
     @Override
@@ -51,11 +52,13 @@ public class MainActivity extends AppCompatActivity{
         mailTxt = findViewById(R.id.mail);
         password = findViewById(R.id.passw);
 
+        signInButton = findViewById(R.id.sign_in_button);
         Button regBtn = findViewById(R.id.regBtn);
         progressBar = findViewById(R.id.progressBar2);
 
         mAuth = FirebaseAuth.getInstance();
 
+        signInButton.setVisibility(View.GONE);
         regBtn.setPaintFlags(regBtn.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

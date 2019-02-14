@@ -254,8 +254,8 @@ public class FirsttimesetupActivity extends AppCompatActivity {
             case R.id.tst:
 
                 FirebaseAuth.getInstance().signOut();
-                finish();
                 startActivity(new Intent(this, MainActivity.class));
+                finish();
 
                 break;
         }
