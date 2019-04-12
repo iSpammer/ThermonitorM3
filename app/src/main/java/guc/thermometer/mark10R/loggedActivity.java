@@ -66,15 +66,15 @@ public class loggedActivity extends AppCompatActivity {
         navBar = ViewConfiguration.get(this).hasPermanentMenuKey();
 
         try{
-        if(!user.getDisplayName().isEmpty()){
-            System.out.println("name "+user.getDisplayName());
-            homeFragment = HomeFragment.newInstance(user.getDisplayName());
-        }
-        else {
-            homeFragment = HomeFragment.newInstance(user.getEmail());
-            System.out.println("mail l "+user.getEmail());
+            if(!user.getDisplayName().isEmpty()){
+                System.out.println("name "+user.getDisplayName());
+                homeFragment = HomeFragment.newInstance(user.getDisplayName());
+            }
+            else {
+                homeFragment = HomeFragment.newInstance(user.getEmail());
+                System.out.println("mail l "+user.getEmail());
 
-        }
+            }
         }catch (NullPointerException e){
             homeFragment = HomeFragment.newInstance(user.getEmail());
         }
@@ -318,7 +318,7 @@ public class loggedActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             result.getActionBarDrawerToggle().setDrawerIndicatorEnabled(true);
         } else {
-           super.onBackPressed();
+            super.onBackPressed();
         }
         if(homeFragment.isVisible()){
 

@@ -8,9 +8,11 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 
-class customAdapter extends ArrayAdapter<String> {
-    public customAdapter(Context context, String[] items) {
+
+class CustomAdapter extends ArrayAdapter<String> {
+    public CustomAdapter(Context context, ArrayList<String> items) {
         super(context,R.layout.custom_row, items);
     }
 
@@ -48,7 +50,7 @@ class customAdapter extends ArrayAdapter<String> {
                 imgView.setImageResource(R.drawable.kotlin);
                 break;
             default:
-                imgView.setImageResource(R.mipmap.ic_launcher_round);
+                imgView.setImageResource(R.drawable.esp);
 
         }
         return CustomView;

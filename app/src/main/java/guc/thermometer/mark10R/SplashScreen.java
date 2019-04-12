@@ -13,8 +13,6 @@ public class SplashScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //This method is used so that your splash activity
-        //can cover the entire screen.
 
         setContentView(R.layout.activity_splash_screen);
 
